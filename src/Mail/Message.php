@@ -349,43 +349,6 @@ class Message extends MimePart
 	protected function build()
 	{
 		$mail = clone $this;
-		$mail->setHeader('Message-ID', $this->getRandomId());
-
-		$cursor = $mail;
-		if ($mail->attachments) {
-			$tmp = $cursor->setContentType('multipart/mixed');
-			$cursor = $cursor->addPart();
-			foreach ($mail->attachments as $value) {
-				$tmp->addPart($value);
-			}
-		}
-
-		if ($mail->html != NULL) { // intentionally ==
-			$tmp = $cursor->setContentType('multipart/alternative');
-			$cursor = $cursor->addPart();
-			$alt = $tmp->addPart();
-			if ($mail->inlines) {
-				$tmp = $alt->setContentType('multipart/related');
-				$alt = $alt->addPart();
-				foreach ($mail->inlines as $value) {
-					$tmp->addPart($value);
-				}
-			}
-			$alt->setContentType('text/html', 'UTF-8')
-				->setEncoding(preg_match('#[^\n]{990}#', $mail->html)
-					? self::ENCODING_QUOTED_PRINTABLE
-					: (preg_match('#[\x80-\xFF]#', $mail->html) ? self::ENCODING_8BIT : self::ENCODING_7BIT))
-				->setBody($mail->html);
-		}
-
-		$text = $mail->getBody();
-		$mail->setBody(NULL);
-		$cursor->setContentType('text/plain', 'UTF-8')
-			->setEncoding(preg_match('#[^\n]{990}#', $text)
-				? self::ENCODING_QUOTED_PRINTABLE
-				: (preg_match('#[\x80-\xFF]#', $text) ? self::ENCODING_8BIT : self::ENCODING_7BIT))
-			->setBody($text);
-
 		return $mail;
 	}
 
